@@ -9,101 +9,121 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#1F2124;font-family:'Inter',system-ui,sans-serif;-webkit-text-size-adjust:100%;overflow-x:hidden;color:#E6E8EA}
-button,input,textarea{font-family:inherit}
+button,input,textarea,select{font-family:inherit}
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-track{background:#1F2124}
 ::-webkit-scrollbar-thumb{background:#2F3338;border-radius:2px}
 #app{min-height:100vh}
-
-/* grid cells */
 .gc{cursor:pointer;user-select:none;transition:filter .15s}
 .gc:hover{filter:brightness(1.3)}
-
-/* buttons */
 .btn-g{background:none;border:1px solid #2F3338;color:#9AA1A8;border-radius:4px;cursor:pointer;font-size:10px;padding:5px 9px;transition:background .15s}
 .btn-g:hover{background:rgba(255,255,255,0.05)}
-
-/* sheet overlay */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:flex-end;justify-content:center;z-index:300}
 .sheet{background:#262A2D;border-radius:14px 14px 0 0;width:100%;max-width:540px;border:1px solid #2F3338;max-height:85vh;display:flex;flex-direction:column}
 .sheet-handle{width:32px;height:3px;background:#2F3338;border-radius:2px;margin:12px auto 12px}
 .sheet-header{padding:0 18px 12px;border-bottom:1px solid #2F3338;flex-shrink:0}
 .sheet-body{overflow-y:auto;padding:14px 18px 36px;flex:1}
-
-/* textarea */
 textarea{width:100%;padding:10px 12px;font-size:14px;color:#E6E8EA;background:#1a1d20;border:1px solid #2F3338;border-radius:6px;resize:none;line-height:1.6;display:block;outline:none}
 textarea:focus{border-color:#9AA1A8}
-
-/* toast */
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#2a2e32;color:#E6E8EA;padding:8px 18px;border-radius:20px;font-size:12px;border:1px solid #2F3338;pointer-events:none;z-index:400;letter-spacing:.03em;white-space:nowrap;opacity:0;transition:opacity .2s}
 .toast.show{opacity:1}
-
-/* metric card */
 .card{background:#262A2D;border:1px solid #2F3338;border-radius:6px;padding:10px 11px;min-width:0;overflow:hidden}
 .card-label{font-size:9px;color:#9AA1A8;letter-spacing:.04em;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-value{font-size:17px;font-weight:200;color:#E6E8EA;letter-spacing:-.02em}
 .card-sub{font-size:9px;color:#5a6068;margin-top:2px}
-
-/* note row */
 .note-row{padding:8px 10px;background:#1a1d20;border-radius:5px;margin-bottom:6px;border-left:2px solid #2F3338}
 .note-row-label{font-size:9px;color:#5a6068;letter-spacing:.05em;margin-bottom:3px;text-transform:uppercase}
 .note-row-text{font-size:12px;color:#9AA1A8;line-height:1.6}
-
-/* tabs */
 .tab-bar{display:flex;gap:3px;background:#262A2D;padding:4px;border-radius:7px;border:1px solid #2F3338;margin-bottom:12px}
 .tab-btn{flex:1;padding:7px 4px;font-size:11px;border-radius:5px;border:none;background:transparent;color:#9AA1A8;cursor:pointer;transition:all .15s;font-weight:400}
 .tab-btn.active{background:#1a1d20;color:#F2C572;font-weight:500}
-
-/* future cell message */
 .future-msg{padding:12px;background:#1a1d20;border-radius:6px;text-align:center}
+.highlight-pulse{animation:pulse 1.5s ease-out}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(242,197,114,.6)}70%{box-shadow:0 0 0 6px rgba(242,197,114,0)}100%{box-shadow:none}}
+.cmd-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;height:52px;background:#0d0f11;border-top:1px solid #2F3338;display:flex;align-items:center;padding:0 16px 0 16px;padding-bottom:env(safe-area-inset-bottom,0px);gap:10px;font-family:'Inter',monospace;cursor:pointer;user-select:none}
+.cmd-bar:hover{background:#111417}
+.cmd-text{font-size:12px;color:#9AA1A8;letter-spacing:.02em;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmd-text em{color:#F2C572;font-style:normal}
+.cmd-input{background:none;border:none;outline:none;font-size:12px;color:#E6E8EA;flex:1;font-family:inherit;letter-spacing:.02em;caret-color:#F2C572}
+.cmd-btn{background:none;border:1px solid #2F3338;color:#9AA1A8;border-radius:3px;cursor:pointer;font-size:10px;padding:3px 7px;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.cmd-btn:hover,.cmd-btn.active{background:rgba(242,197,114,.12);color:#F2C572;border-color:#F2C572}
+.cmd-btn.opt0{border-color:#4A3A5A;color:#9A8AAA}
+.cmd-btn.opt0:hover,.cmd-btn.opt0.sel{background:#4A3A5A;color:#E6E8EA;border-color:#6A5A7A}
+.cmd-btn.opt1{border-color:#5A4A6A}
+.cmd-btn.opt1:hover,.cmd-btn.opt1.sel{background:#3d3550;color:#E6E8EA;border-color:#7A6A8A}
+.cmd-btn.opt2:hover,.cmd-btn.opt2.sel{background:rgba(154,161,168,.15);color:#E6E8EA}
+.cmd-btn.opt3:hover,.cmd-btn.opt3.sel{background:rgba(242,197,114,.15);color:#F2C572;border-color:#F2C572}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.cursor{animation:blink 1.2s step-end infinite;color:#F2C572}
+@media(max-width:400px){.cmd-bar{padding:0 10px;gap:6px}.cmd-text,.cmd-input{font-size:11px}.cmd-btn{font-size:9px;padding:3px 5px}}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div class="toast" id="toast"></div>
-
 <script>
 'use strict';
-const APP_VERSION = '1.0';
-
-// ── Constants ─────────────────────────────────────────────────────
+const APP_VERSION='2.3';
 const BG='#1F2124',CARD='#262A2D',DEEP='#1a1d20',BORDER='#2F3338';
 const PAST='#8B949E',FUTURE='#2F3338',CURRENT='#F2C572';
 const TPRI='#E6E8EA',TSEC='#9AA1A8';
 const NL={week:140,month:280,year:500,decade:1000};
 const MS=[{label:'school',year:5},{label:'adulthood',year:18},{label:'career',year:22},{label:'midlife',year:45},{label:'retirement',year:65}];
 const MN=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-const STORE_KEY='ls_v1', CONFIG_KEY='ls_cfg_v1';
+const STORE_KEY='ls_v2',CONFIG_KEY='ls_cfg_v2';
 
-// ── HTML escape ───────────────────────────────────────────────────
+const MOOD_LABELS=['critical','degraded','nominal','optimal'];
+// ── Season color system ───────────────────────────────────────────
+const SC={winter:0x7FA7C9,spring:0x8FBF9A,summer:0xE3B663,autumn:0xC47A4A};
+const SPEAKS=[{d:-50,c:SC.winter},{d:15,c:SC.winter},{d:105,c:SC.spring},{d:196,c:SC.summer},{d:288,c:SC.autumn},{d:380,c:SC.winter},{d:470,c:SC.spring}];
+function lerpColor(a,b,t){
+  const ar=a>>16,ag=(a>>8)&0xff,ab=a&0xff,br=b>>16,bg=(b>>8)&0xff,bb=b&0xff;
+  const rr=ar+t*(br-ar),rg=ag+t*(bg-ag),rb2=ab+t*(bb-ab);
+  return'#'+(((1<<24)+(rr<<16)+(rg<<8)+rb2)|0).toString(16).slice(1);
+}
+function _ss(t){return t*t*(3-2*t);}
+function seasonColor(birthDoy,weekIdx){
+  const d=((birthDoy+weekIdx*7)%365+365)%365;
+  let p0=SPEAKS[1],p1=SPEAKS[2];
+  for(let i=1;i<SPEAKS.length-1;i++){
+    if(d<SPEAKS[1].d){p0=SPEAKS[0];p1=SPEAKS[1];break;}
+    if(d>=SPEAKS[i].d&&d<SPEAKS[i+1].d){p0=SPEAKS[i];p1=SPEAKS[i+1];break;}
+  }
+  const span=p1.d-p0.d;if(span<=0)return lerpColor(p0.c,p1.c,0);
+  return lerpColor(p0.c,p1.c,_ss(Math.max(0,Math.min(1,(d-p0.d)/span))));
+}
+function getBirthDoy(){
+  if(!A.birthDate)return 0;
+  const b=new Date(A.birthDate),s=new Date(b.getFullYear(),0,1);
+  return Math.floor((b-s)/86400000);
+}
+function getWeekColor(weekIdx){return seasonColor(getBirthDoy(),weekIdx);}
 function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-// ── State ─────────────────────────────────────────────────────────
-let A = {
-  step: 'input',       // 'input' | 'dashboard'
-  birthDate: '',
-  lifespan: 90,
-  mission: '',
-  tab: 'weeks',
-  notes: {},
-  sheet: null,         // {type,noteKey,title,subtitle,limit,isPast} | null
-  sheetText: '',
-  stats: null,
-  rendered: false,
+
+
+let A={
+  step:'input',birthDate:'',lifespan:90,mission:'',
+  tab:'weeks',notes:{},moods:{},sheet:null,sheetText:'',stats:null,
+  highlightWeek:null,gotoOpen:false,aiOpen:false,timeItems:null,timeSheet:false,
+  missionStartWeek:null,missionLog:[],legendOpen:false,
+  logSheet:false,logStep:'rate',logMood:null,logNote:'',logMissionDone:null
 };
 
-function save(){localStorage.setItem(STORE_KEY, JSON.stringify({notes:A.notes}));}
-function saveConfig(){localStorage.setItem(CONFIG_KEY, JSON.stringify({birthDate:A.birthDate,lifespan:A.lifespan,mission:A.mission}));}
-
+function save(){localStorage.setItem(STORE_KEY,JSON.stringify({notes:A.notes,moods:A.moods}));}
+function saveConfig(){localStorage.setItem(CONFIG_KEY,JSON.stringify({birthDate:A.birthDate,lifespan:A.lifespan,mission:A.mission,timeItems:A.timeItems,missionStartWeek:A.missionStartWeek,missionLog:A.missionLog}));}
+const DEFAULT_TIME_ITEMS=[
+  {l:'weeks until retirement',type:'age',target:65,unit:'weeks'},
+  {l:'weeks until 2040',type:'date',target:'2040-01-01',unit:'weeks'},
+];
+function getTimeItems(){return A.timeItems&&A.timeItems.length?A.timeItems:DEFAULT_TIME_ITEMS;}
 function load(){
-  try{const n=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');A.notes=n.notes||{};}catch{}
-  try{
-    const cfg=JSON.parse(localStorage.getItem(CONFIG_KEY)||'null');
-    if(cfg&&cfg.birthDate){A.birthDate=cfg.birthDate;A.lifespan=cfg.lifespan||90;A.mission=cfg.mission||'';A.stats=calcStats(A.birthDate,A.lifespan);A.step='dashboard';}
+  try{const n=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');A.notes=n.notes||{};A.moods=n.moods||{};}catch{}
+  try{const cfg=JSON.parse(localStorage.getItem(CONFIG_KEY)||'null');
+    if(cfg&&cfg.birthDate){A.birthDate=cfg.birthDate;A.lifespan=cfg.lifespan||90;A.mission=cfg.mission||'';A.timeItems=cfg.timeItems||null;A.missionStartWeek=cfg.missionStartWeek||null;A.missionLog=cfg.missionLog||[];A.stats=calcStats(A.birthDate,A.lifespan);A.step='dashboard';}
   }catch{}
 }
 
-// ── Stats ─────────────────────────────────────────────────────────
 function calcStats(bd,ls){
   const now=new Date(),birth=new Date(bd),ms=now-birth;
   const weeksLived=Math.max(0,Math.floor(ms/604800000));
@@ -120,8 +140,7 @@ function calcStats(bd,ls){
   const clockMin=(pct/100)*1440;
   const ch=Math.floor(clockMin/60)%24,cm=Math.floor(clockMin%60);
   const clockStr=String(ch).padStart(2,'0')+':'+String(cm).padStart(2,'0');
-  const orbits=yearsLived.toFixed(1);
-  return{weeksLived,totalWeeks,weeksRemaining,daysLived,pct,heartbeats,memoryWrites,networkConns,storageUsed,errorRate,clockStr,yearsLived,ls,orbits};
+  return{weeksLived,totalWeeks,weeksRemaining,daysLived,pct,heartbeats,memoryWrites,networkConns,storageUsed,errorRate,clockStr,yearsLived,ls,orbits:yearsLived.toFixed(1)};
 }
 
 function weekRange(bd,idx){
@@ -131,88 +150,266 @@ function weekRange(bd,idx){
   return s.toLocaleDateString('en-US',o)+' – '+ev.toLocaleDateString('en-US',o);
 }
 
+function dateToWeekIdx(bd,dateStr){
+  const birth=new Date(bd),target=new Date(dateStr);
+  return Math.max(0,Math.floor((target-birth)/604800000));
+}
+
 function fmt(n){return new Intl.NumberFormat().format(Math.round(n));}
 const wk=i=>`w${i}`;
 const mk=(y,m)=>`m${y}_${m}`;
 const yk=y=>`y${y}`;
 const dk=d=>`d${d}`;
 
-// ── Toast ─────────────────────────────────────────────────────────
 let toastTimer=null;
 function showToast(msg){
-  const t=document.getElementById('toast');
-  if(!t)return;
+  const t=document.getElementById('toast');if(!t)return;
   t.textContent=msg;t.classList.add('show');
   clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
 }
 
-// ── Render ────────────────────────────────────────────────────────
 function render(){document.getElementById('app').innerHTML=buildAll();}
-
 function buildAll(){
   if(A.step==='input')return buildInput();
   return buildDashboard();
 }
 
-// ── Input screen ──────────────────────────────────────────────────
+// ── Input ─────────────────────────────────────────────────────────
 function buildInput(){
-  return `
-  <div style="min-height:100vh;background:${BG};display:flex;align-items:center;justify-content:center;padding:24px 20px">
-    <div style="width:100%;max-width:400px">
-      <h1 style="font-size:22px;font-weight:300;color:${TPRI};letter-spacing:-.01em;margin-bottom:6px">life system</h1>
-      <p style="font-size:13px;color:${TSEC};margin-bottom:32px;line-height:1.7">a visualization of your time as a running system.</p>
-      <div style="display:flex;flex-direction:column;gap:18px">
-        <div>
-          <label style="display:block;font-size:11px;color:${TSEC};margin-bottom:6px;letter-spacing:.06em">birth date</label>
-          <input id="inp-bd" type="date" value="${e(A.birthDate)}" style="width:100%;padding:12px 14px;font-size:16px;color:${TPRI};background:#262A2D;border:1px solid ${BORDER};border-radius:6px;outline:none;color-scheme:dark"/>
-        </div>
-        <div>
-          <label style="display:block;font-size:11px;color:${TSEC};margin-bottom:6px;letter-spacing:.06em">expected lifespan <span style="color:#5a6068">(yrs, default 90)</span></label>
-          <input id="inp-ls" type="number" value="${e(A.lifespan)}" min="1" max="120" style="width:100%;padding:12px 14px;font-size:16px;color:${TPRI};background:#262A2D;border:1px solid ${BORDER};border-radius:6px;outline:none"/>
-        </div>
-        <div>
-          <label style="display:block;font-size:11px;color:${TSEC};margin-bottom:6px;letter-spacing:.06em">current mission <span style="color:#5a6068">(optional)</span></label>
-          <input id="inp-ms" type="text" value="${e(A.mission)}" placeholder="what are you building?" style="width:100%;padding:12px 14px;font-size:16px;color:${TPRI};background:#262A2D;border:1px solid ${BORDER};border-radius:6px;outline:none"/>
-        </div>
-        <button onclick="handleStart()" style="margin-top:4px;padding:14px;background:${CURRENT};color:#1F2124;border:none;border-radius:6px;font-size:15px;cursor:pointer;font-weight:500">initialize system</button>
+  return `<div style="min-height:100vh;background:${BG};display:flex;align-items:center;justify-content:center;padding:24px 20px">
+  <div style="width:100%;max-width:400px">
+    <h1 style="font-size:22px;font-weight:300;color:${TPRI};letter-spacing:-.01em;margin-bottom:6px">life system</h1>
+    <p style="font-size:13px;color:${TSEC};margin-bottom:32px;line-height:1.7">a visualization of your time as a running system.</p>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div>
+        <label style="display:block;font-size:11px;color:${TSEC};margin-bottom:6px;letter-spacing:.06em">birth date</label>
+        <input id="inp-bd" type="date" value="${e(A.birthDate)}" style="width:100%;padding:12px 14px;font-size:16px;color:${TPRI};background:#262A2D;border:1px solid ${BORDER};border-radius:6px;outline:none;color-scheme:dark"/>
       </div>
-      <p style="margin-top:48px;font-size:11px;color:#3d4348;letter-spacing:.05em">systems run one cycle at a time. <span style="color:#3d4348;font-size:9px">v${APP_VERSION}</span></p>
+      <div>
+        <label style="display:block;font-size:11px;color:${TSEC};margin-bottom:6px;letter-spacing:.06em">expected lifespan</label>
+        <select id="inp-ls" style="width:100%;padding:12px 14px;font-size:16px;color:${TPRI};background:#262A2D;border:1px solid ${BORDER};border-radius:6px;outline:none">
+          ${[80,90,100,120].map(v=>`<option value="${v}"${A.lifespan==v?' selected':''}>${v} years${v===90?' (default)':v===120?' (optimistic)':''}</option>`).join('')}
+        </select>
+      </div>
+      <div>
+        <label style="display:block;font-size:11px;color:${TSEC};margin-bottom:6px;letter-spacing:.06em">current mission <span style="color:#5a6068">(optional)</span></label>
+        <input id="inp-ms" type="text" value="${e(A.mission)}" placeholder="what are you building?" style="width:100%;padding:12px 14px;font-size:16px;color:${TPRI};background:#262A2D;border:1px solid ${BORDER};border-radius:6px;outline:none"/>
+      </div>
+      <button onclick="handleStart()" style="margin-top:4px;padding:14px;background:${CURRENT};color:#1F2124;border:none;border-radius:6px;font-size:15px;cursor:pointer;font-weight:500">initialize system</button>
     </div>
-  </div>`;
+    <p style="margin-top:48px;font-size:11px;color:#3d4348;letter-spacing:.05em">systems run one cycle at a time. <span style="font-size:9px">v${APP_VERSION}</span></p>
+  </div>
+</div>`;
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────
 function buildDashboard(){
   const s=A.stats;
-  return `
-  <div style="min-height:100vh;background:${BG}">
-    ${buildSun(s.clockStr)}
-    <div style="padding:0 14px 72px;max-width:600px;margin:0 auto">
-      ${buildHeader(s)}
-      ${A.mission?`<div style="margin-bottom:14px;padding:10px 13px;background:${CARD};border-radius:6px;border-left:2px solid ${CURRENT}"><div style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase">current mission</div><div style="margin-top:4px;font-size:13px;color:${TPRI};font-style:italic;line-height:1.6">${e(A.mission)}</div></div>`:''}
-      ${buildMetrics(s)}
-      ${buildObservations(s)}
-      ${buildTabs()}
-      ${buildGridPanel()}
-      <p style="font-size:10px;color:#3d4348;letter-spacing:.05em;text-align:center">systems run one cycle at a time.</p>
-    </div>
-    ${A.sheet?buildSheet():''}
-  </div>`;
+  return `<div style="min-height:100vh;background:${BG};padding-top:0">
+  ${buildCommandBar(s)}
+  ${buildSun(s.clockStr)}
+  <div style="padding:0 14px 90px;max-width:600px;margin:0 auto">
+    ${buildHeader(s)}
+    ${A.mission?`<div style="margin-bottom:14px;padding:10px 13px;background:${CARD};border-radius:6px;border-left:2px solid ${CURRENT}"><div style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase">current mission</div><div style="margin-top:4px;font-size:13px;color:${TPRI};font-style:italic;line-height:1.6">${e(A.mission)}${A.missionStartWeek!==null?`<span style="font-size:10px;color:#5a6068;font-style:normal;margin-left:8px">${s.weeksLived-A.missionStartWeek} wk</span>`:''}​</div></div>`:''}
+    ${buildMetrics(s)}
+    ${buildObservations(s)}
+    ${buildTimeRemaining(s)}
+    ${buildTabs()}
+    ${buildGridPanel()}
+    ${buildImportExport()}
+    <p style="font-size:10px;color:#3d4348;letter-spacing:.05em;text-align:center;margin-top:8px">systems run one cycle at a time.</p>
+  </div>
+  ${A.sheet?buildSheet():''}
+  ${A.timeSheet?buildTimeSheetHTML():''}
+  ${A.logSheet?buildLogSheet():''}
+</div>`;
 }
 
+// ── Command Bar (display only) ──────────────────────────────────
+function buildCommandBar(s){
+  const wIdx=s.weeksLived;
+  const mood=A.moods[wk(wIdx)];
+  const hasLog=mood!==undefined||!!A.notes[wk(wIdx)];
+  const ml=hasLog?MOOD_LABELS[mood??2]:null;
+  const preview=A.notes[wk(wIdx)];
+  const mwk=A.missionStartWeek!==null?s.weeksLived-A.missionStartWeek:0;
+  let txt='';
+  if(hasLog){
+    txt=`<em>></em> cycle ${wIdx} · <em>${ml}</em>${preview?` · "${e(preview.slice(0,38))}${preview.length>38?'…':''}"`:''}`;
+  } else {
+    txt=`<em>></em> cycle ${wIdx} · <em style="color:#5a6068">no entry</em>`;
+  }
+  if(A.mission){
+    txt+=` <span style="color:#3d4348;font-size:10px">· ${e(A.mission.slice(0,22))}${A.mission.length>22?'…':''} ${mwk}wk</span>`;
+  }
+  return `<div class="cmd-bar" onclick="openLogSheet()"><span class="cmd-text">${txt}<span class="cursor">_</span></span></div>`;
+}
+
+function openLogSheet(){
+  A.logSheet=true;
+  A.logStep='rate';
+  const wIdx=A.stats.weeksLived;
+  A.logMood=A.moods[wk(wIdx)]??null;
+  A.logNote=A.notes[wk(wIdx)]||'';
+  A.logMissionDone=null;
+  render();
+  setTimeout(()=>{const ta=document.getElementById('log-note-ta');if(ta&&A.logStep==='note'){ta.focus();}},80);
+}
+
+function closeLogSheet(){A.logSheet=false;render();}
+
+function logSetMood(m){
+  A.logMood=m;
+  A.moods[wk(A.stats.weeksLived)]=m;
+  save();
+  // advance to mission step if mission active, else note
+  A.logStep=A.mission?'mission':'note';
+  render();
+  setTimeout(()=>{if(A.logStep==='note'){document.getElementById('log-note-ta')?.focus();}},80);
+}
+
+function logMissionAnswer(done){
+  const wIdx=A.stats.weeksLived;
+  if(done){
+    // Y = accomplished, prompt new mission
+    const wks=A.missionStartWeek!==null?wIdx-A.missionStartWeek:0;
+    A.missionLog.push({week:wIdx,mission:A.mission,status:'complete',weeks:wks});
+    A.mission='';A.missionStartWeek=null;
+    saveConfig();
+    A.logStep='newmission';
+  } else {
+    // N = still working
+    A.logStep='note';
+  }
+  render();
+  setTimeout(()=>{
+    if(A.logStep==='note')document.getElementById('log-note-ta')?.focus();
+    if(A.logStep==='newmission')document.getElementById('log-mission-inp')?.focus();
+  },80);
+}
+
+function logSaveNewMission(){
+  const inp=document.getElementById('log-mission-inp');
+  const ms=(inp?.value||'').trim();
+  if(ms){A.mission=ms;A.missionStartWeek=A.stats.weeksLived;saveConfig();}
+  A.logStep='note';
+  render();
+  setTimeout(()=>document.getElementById('log-note-ta')?.focus(),80);
+}
+
+function logSkipMission(){A.logStep='note';render();setTimeout(()=>document.getElementById('log-note-ta')?.focus(),80);}
+
+function logSave(){
+  const wIdx=A.stats.weeksLived;
+  const note=A.logNote.trim();
+  if(note)A.notes[wk(wIdx)]=note;
+  else delete A.notes[wk(wIdx)];
+  save();
+  closeLogSheet();
+  showToast('cycle logged');
+}
+
+function buildLogSheet(){
+  if(!A.logSheet)return'';
+  const wIdx=A.stats.weeksLived;
+  const step=A.logStep;
+  const mwk=A.missionStartWeek!==null?wIdx-A.missionStartWeek:0;
+
+  // ── mini keyboard keys helper
+  function miniKeys(keys){
+    // keys: [{k:'0',label:'critical',action:'logSetMood(0)',sel:false}, ...]
+    const rows=[];
+    for(let i=0;i<keys.length;i+=2){
+      const pair=keys.slice(i,i+2);
+      rows.push(`<div style="display:flex;gap:8px">${pair.map(k=>`
+        <button onclick="${k.action}" style="flex:1;padding:14px 8px;border-radius:8px;border:1px solid ${k.sel?CURRENT:'#2F3338'};background:${k.sel?'rgba(242,197,114,.1)':'#0d0f11'};cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .15s">
+          <span style="font-size:18px;font-weight:300;color:${CURRENT};font-family:monospace">${k.k}</span>
+          <span style="font-size:10px;color:#9AA1A8;letter-spacing:.04em">${k.label}</span>
+        </button>`).join('')}</div>`);
+    }
+    return rows.join('<div style="height:8px"></div>');
+  }
+
+  let body='';
+
+  if(step==='rate'){
+    const keys=[
+      {k:'0',label:'critical',action:'logSetMood(0)',sel:A.logMood===0},
+      {k:'1',label:'degraded',action:'logSetMood(1)',sel:A.logMood===1},
+      {k:'2',label:'nominal', action:'logSetMood(2)',sel:A.logMood===2},
+      {k:'3',label:'optimal', action:'logSetMood(3)',sel:A.logMood===3},
+    ];
+    body=`<div style="font-size:10px;color:#5a6068;letter-spacing:.06em;text-transform:uppercase;margin-bottom:16px">> rate cycle ${wIdx}</div>
+    ${miniKeys(keys)}`;
+  }
+
+  if(step==='mission'){
+    const keys=[
+      {k:'Y',label:'accomplished',action:'logMissionAnswer(true)',sel:false},
+      {k:'N',label:'still working',action:'logMissionAnswer(false)',sel:false},
+    ];
+    body=`<div style="font-size:10px;color:#5a6068;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">> mission accomplished?</div>
+    <div style="font-size:12px;color:${CURRENT};font-style:italic;margin-bottom:16px">"${e(A.mission.slice(0,40))}" · ${mwk}wk</div>
+    ${miniKeys(keys)}`;
+  }
+
+  if(step==='newmission'){
+    body=`<div style="font-size:10px;color:#5a6068;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px">> set new mission</div>
+    <input id="log-mission-inp" type="text" maxlength="80" placeholder="what are you building?_"
+      style="width:100%;padding:12px 14px;font-size:15px;color:${TPRI};background:#0d0f11;border:1px solid ${BORDER};border-radius:8px;outline:none;caret-color:${CURRENT};font-family:inherit;letter-spacing:.02em"
+      oninput="" onkeydown="if(event.key==='Enter')logSaveNewMission()"/>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button onclick="logSaveNewMission()" style="flex:1;padding:12px;background:rgba(242,197,114,.1);border:1px solid ${CURRENT};border-radius:8px;color:${CURRENT};font-size:13px;cursor:pointer">set mission</button>
+      <button onclick="logSkipMission()" style="padding:12px 16px;background:none;border:1px solid ${BORDER};border-radius:8px;color:#5a6068;font-size:13px;cursor:pointer">skip</button>
+    </div>`;
+  }
+
+  if(step==='note'){
+    const rem=500-A.logNote.length;
+    body=`<div style="font-size:10px;color:#5a6068;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px">> log entry <span style="opacity:.5">optional</span></div>
+    <textarea id="log-note-ta" rows="6" maxlength="500" placeholder="what happened this cycle…&#10;&#10;write freely, paragraphs welcome."
+      style="width:100%;padding:12px 14px;font-size:14px;color:${TPRI};background:#0d0f11;border:1px solid ${BORDER};border-radius:8px;resize:none;line-height:1.7;outline:none;caret-color:${CURRENT};font-family:inherit"
+      oninput="A.logNote=this.value;document.getElementById('log-rem').textContent=500-this.value.length+' left'"
+    >${e(A.logNote)}</textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span id="log-rem" style="font-size:10px;color:#3d4348">${rem} left</span>
+      <div style="display:flex;gap:8px">
+        <button onclick="closeLogSheet()" style="padding:10px 16px;background:none;border:1px solid ${BORDER};border-radius:7px;color:#5a6068;font-size:13px;cursor:pointer">cancel</button>
+        <button onclick="logSave()" style="padding:10px 22px;background:${CURRENT};border:none;border-radius:7px;color:#1F2124;font-size:13px;cursor:pointer;font-weight:500">save</button>
+      </div>
+    </div>`;
+  }
+
+  return `<div class="overlay" onclick="if(event.target.classList.contains('overlay'))closeLogSheet()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div style="padding:0 18px 4px;border-bottom:1px solid ${BORDER};display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+      <div>
+        <div style="font-size:15px;font-weight:300;color:${TPRI}">cycle ${wIdx}</div>
+        <div style="font-size:11px;color:#5a6068;margin-top:2px">${weekRange(A.birthDate,wIdx)}</div>
+      </div>
+      <button onclick="closeLogSheet()" style="font-size:22px;color:#5a6068;background:none;border:none;cursor:pointer;padding:0 4px;line-height:1">×</button>
+    </div>
+    <div style="padding:20px 18px 36px;overflow-y:auto;flex:1">
+      ${body}
+    </div>
+  </div>
+</div>`;
+}
+
+
 function buildHeader(s){
-  return `
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin:12px 0 16px;flex-wrap:wrap;gap:8px">
-    <div>
-      <h1 style="font-size:16px;font-weight:300;color:${TPRI};letter-spacing:-.01em">life system</h1>
-      <p style="font-size:10px;color:${TSEC};margin-top:3px;letter-spacing:.04em">runtime — ${Math.floor(s.weeksLived/52)} yr ${s.weeksLived%52} wk</p>
-    </div>
-    <div style="display:flex;gap:5px">
-      <button class="btn-g" onclick="doBackup()">↓ backup</button>
-      <button class="btn-g" onclick="doRestore()">↑ restore</button>
-      <button class="btn-g" onclick="goConfig()">⚙</button>
-    </div>
-  </div>`;
+  return `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin:12px 0 16px;flex-wrap:wrap;gap:8px">
+  <div>
+    <h1 style="font-size:16px;font-weight:300;color:${TPRI};letter-spacing:-.01em">life system</h1>
+    <p style="font-size:10px;color:${TSEC};margin-top:3px;letter-spacing:.04em">runtime — ${Math.floor(s.weeksLived/52)} yr ${s.weeksLived%52} wk</p>
+  </div>
+  <div style="display:flex;gap:5px;align-items:center">
+    <button class="btn-g" onclick="doBackup()">↓ backup</button>
+    <button class="btn-g" onclick="doRestore()">↑ restore</button>
+    <button class="btn-g" onclick="goConfig()">⚙</button>
+  </div>
+</div>`;
 }
 
 function buildMetrics(s){
@@ -234,6 +431,7 @@ function buildMetrics(s){
 }
 
 function buildObservations(s){
+  const noEntry=A.moods[wk(s.weeksLived)]===undefined&&!A.notes[wk(s.weeksLived)];
   const obs=[
     `completed ${s.pct.toFixed(1)}% of expected runtime.`,
     `if life were a 24-hour cycle, current time is ${s.clockStr}.`,
@@ -241,53 +439,170 @@ function buildObservations(s){
     `~${fmt(s.memoryWrites)} memory writes since boot.`,
     `${fmt(s.weeksRemaining)} cycles remain.`,
   ];
-  return `
-  <div style="background:${CARD};border:1px solid ${BORDER};border-radius:6px;padding:13px 14px;margin-bottom:14px">
-    <div style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">system observations</div>
-    ${obs.map(o=>`<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:7px"><span style="color:${CURRENT};font-size:10px;margin-top:2px;flex-shrink:0;opacity:.7">→</span><span style="font-size:12px;color:${TSEC};line-height:1.6">${e(o)}</span></div>`).join('')}
-  </div>`;
+  return `<div style="background:${CARD};border:1px solid ${BORDER};border-radius:6px;padding:13px 14px;margin-bottom:14px">
+  <div style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">system observations</div>
+  ${noEntry?`<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:7px;cursor:pointer" onclick="openLogSheet()"><span style="color:#9A8AAA;font-size:10px;margin-top:2px;flex-shrink:0">⚠</span><span style="font-size:12px;color:#9A8AAA;line-height:1.6">no entry logged this cycle. <span style="text-decoration:underline;opacity:.7">log now</span></span></div>`:''}
+  ${obs.map(o=>`<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:7px"><span style="color:${CURRENT};font-size:10px;margin-top:2px;flex-shrink:0;opacity:.7">→</span><span style="font-size:12px;color:${TSEC};line-height:1.6">${e(o)}</span></div>`).join('')}
+</div>`;
 }
 
+// ── Time Remaining ────────────────────────────────────────────────
+function calcTimeValue(item,s){
+  const age=s.yearsLived;
+  let ms=0;
+  if(item.type==='age'){ms=Math.max(0,(item.target-age)*365.25*86400000);}
+  else{ms=Math.max(0,new Date(item.target)-new Date());}
+  const weeks=Math.round(ms/604800000);
+  if(item.unit==='days')return{v:Math.round(ms/86400000),sub:item.unit};
+  if(item.unit==='years')return{v:(ms/(365.25*86400000)).toFixed(1),sub:item.unit};
+  return{v:weeks,sub:'weeks'};
+}
+function buildTimeRemaining(s){
+  const items=getTimeItems();
+  return `<div style="background:${CARD};border:1px solid ${BORDER};border-radius:6px;padding:13px 14px;margin-bottom:14px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <div style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase">time remaining for important things</div>
+    <button onclick="openTimeSheet()" style="background:none;border:none;color:${TSEC};cursor:pointer;font-size:13px;padding:0 2px;opacity:.6" title="edit">✎</button>
+  </div>
+  ${items.map(it=>{const r=calcTimeValue(it,s);return`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid ${BORDER}">
+    <div style="font-size:12px;color:${TPRI}">${e(it.l)}</div>
+    <div style="text-align:right;flex-shrink:0;margin-left:12px"><div style="font-size:16px;font-weight:200;color:${CURRENT}">${fmt(r.v)}</div><div style="font-size:9px;color:#5a6068">${r.sub}</div></div>
+  </div>`;}).join('')}
+</div>`;}
+
+function buildTimeSheetHTML(){
+  const items=getTimeItems();
+  return `<div class="overlay" onclick="if(event.target.classList.contains('overlay'))closeTimeSheet()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-header">
+      <div class="sheet-handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:15px;font-weight:300;color:${TPRI}">edit time items</div>
+        <button onclick="closeTimeSheet()" style="font-size:20px;color:${TSEC};background:none;border:none;cursor:pointer;padding:0 6px;line-height:1">×</button>
+      </div>
+    </div>
+    <div class="sheet-body">
+      ${items.map((it,i)=>`<div style="background:${DEEP};border-radius:5px;padding:10px;margin-bottom:8px">
+        <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
+          <input value="${e(it.l)}" oninput="updateTimeItem(${i},'l',this.value)" style="flex:1;padding:6px 8px;font-size:12px;color:${TPRI};background:${CARD};border:1px solid ${BORDER};border-radius:4px;outline:none"/>
+          <button onclick="deleteTimeItem(${i})" style="background:none;border:none;color:#e07070;cursor:pointer;font-size:14px;padding:0 4px">×</button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select onchange="updateTimeItem(${i},'type',this.value)" style="padding:5px 7px;font-size:11px;color:${TPRI};background:${CARD};border:1px solid ${BORDER};border-radius:4px;outline:none">
+            <option value="age"${it.type==='age'?' selected':''}>age</option>
+            <option value="date"${it.type==='date'?' selected':''}>date</option>
+          </select>
+          ${it.type==='age'
+            ?`<input type="number" value="${e(it.target)}" oninput="updateTimeItem(${i},'target',+this.value)" style="width:64px;padding:5px 7px;font-size:11px;color:${TPRI};background:${CARD};border:1px solid ${BORDER};border-radius:4px;outline:none"/>`
+            :`<input type="date" value="${e(it.target)}" oninput="updateTimeItem(${i},'target',this.value)" style="flex:1;padding:5px 7px;font-size:11px;color:${TPRI};background:${CARD};border:1px solid ${BORDER};border-radius:4px;outline:none;color-scheme:dark"/>`}
+          <select onchange="updateTimeItem(${i},'unit',this.value)" style="padding:5px 7px;font-size:11px;color:${TPRI};background:${CARD};border:1px solid ${BORDER};border-radius:4px;outline:none">
+            <option value="weeks"${it.unit==='weeks'?' selected':''}>weeks</option>
+            <option value="days"${it.unit==='days'?' selected':''}>days</option>
+            <option value="years"${it.unit==='years'?' selected':''}>years</option>
+          </select>
+        </div>
+      </div>`).join('')}
+      <button onclick="addTimeItem()" class="btn-g" style="width:100%;padding:8px;font-size:11px;margin-top:4px">+ add item</button>
+      <button onclick="saveTimeItems()" style="width:100%;margin-top:8px;padding:10px;background:${CURRENT};color:#1F2124;border:none;border-radius:5px;font-size:13px;cursor:pointer;font-weight:500">save</button>
+    </div>
+  </div>
+</div>`;
+}
+
+// ── Import / Export ───────────────────────────────────────────────
+function buildImportExport(){
+  const open=A.aiOpen;
+  const prompt=`Help me create a life timeline file for import into my Life System app.\n\nOutput in CSV format with these columns:\ndate,title,note\n\nRules:\n- Use real or approximate dates when exact dates are unknown\n- Keep titles short (under 40 chars)\n- Keep notes under 100 characters\n- Focus on meaningful milestones\n- Cover my life from childhood to today\n- Include recurring milestones: birthdays (every year), New Year's (Jan 1 each year), and any personal holidays or traditions\n- If exact dates are unknown, estimate reasonably\n\nI will paste my life history below:\n[PASTE YOUR LIFE HISTORY HERE]`;
+  return `<div style="background:${CARD};border:1px solid ${BORDER};border-radius:6px;padding:13px 14px;margin-bottom:14px">
+  <div style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">timeline import / export</div>
+  <p style="font-size:11px;color:#5a6068;margin-bottom:12px">export your notes as CSV or JSON. import a timeline file to map events to week squares.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    <button class="btn-g" onclick="exportCSV()" style="font-size:11px;padding:7px 14px">↓ export csv</button>
+    <button class="btn-g" onclick="exportJSON()" style="font-size:11px;padding:7px 14px">↓ export json</button>
+    <button class="btn-g" onclick="importFile()" style="font-size:11px;padding:7px 14px">↑ import csv / json</button>
+  </div>
+  <div style="border-top:1px solid ${BORDER};padding-top:10px">
+    <button onclick="A.aiOpen=!A.aiOpen;render()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;width:100%;padding:0">
+      <span style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase;flex:1;text-align:left">ai timeline generator</span>
+      <span style="font-size:11px;color:${TSEC};opacity:.5">${open?'▲':'▼'}</span>
+    </button>
+    ${open?`<div style="margin-top:10px">
+      <p style="font-size:11px;color:#5a6068;margin-bottom:10px">paste this prompt into any AI assistant to generate a timeline you can import.</p>
+      <div style="background:${DEEP};border:1px solid ${BORDER};border-radius:5px;padding:10px 12px;font-size:11px;color:${TSEC};line-height:1.7;white-space:pre-wrap;margin-bottom:10px">${e(prompt)}</div>
+      <button class="btn-g" onclick="copyPrompt()" style="font-size:11px;padding:7px 14px">copy prompt</button>
+    </div>`:''}
+  </div>
+</div>`;}
+
+
+
+// ── Tabs ──────────────────────────────────────────────────────────
 function buildTabs(){
   const tabs=['weeks','months','years','decades'];
   return `<div class="tab-bar">${tabs.map(t=>`<button class="tab-btn${A.tab===t?' active':''}" onclick="setTab('${t}')">${t}</button>`).join('')}</div>`;
 }
 
 function buildGridPanel(){
-  return `
-  <div style="background:${CARD};border:1px solid ${BORDER};border-radius:6px;padding:13px;margin-bottom:20px">
-    <div style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px">lifecycle — ${A.tab}</div>
-    ${A.tab==='weeks'?buildWeekGrid():A.tab==='months'?buildMonthGrid():A.tab==='years'?buildYearGrid():buildDecadeGrid()}
-  </div>`;
+  const gotoOpen=A.gotoOpen;
+  return `<div style="background:${CARD};border:1px solid ${BORDER};border-radius:6px;padding:13px;margin-bottom:14px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase">lifecycle — ${A.tab}</div>
+    <button class="btn-g" onclick="toggleGoto()" title="go to date" style="padding:4px 8px;font-size:11px;${gotoOpen?`background:rgba(242,197,114,.12);color:${CURRENT};border-color:${CURRENT}`:''}" >⌖ date</button>
+  </div>
+  ${gotoOpen?`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+    <input id="goto-date" type="date" style="flex:1;padding:7px 10px;font-size:13px;color:${TPRI};background:${DEEP};border:1px solid ${BORDER};border-radius:5px;outline:none;color-scheme:dark"/>
+    <button onclick="gotoDate()" style="padding:7px 14px;background:${CURRENT};color:#1F2124;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:500;white-space:nowrap">go →</button>
+  </div>`:''}
+  <p style="font-size:10px;color:#5a6068;margin-bottom:10px">tap any cell to add a note to that moment in your life.</p>
+  ${A.tab==='weeks'?buildWeekGrid():A.tab==='months'?buildMonthGrid():A.tab==='years'?buildYearGrid():buildDecadeGrid()}
+  <div style="margin-top:10px;border-top:1px solid ${BORDER};padding-top:8px">
+    <button onclick="A.legendOpen=!A.legendOpen;render()" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;width:100%">
+      <span style="font-size:9px;color:#3d4348;letter-spacing:.06em;text-transform:uppercase;flex:1;text-align:left">legend</span>
+      <span style="font-size:10px;color:#3d4348">${A.legendOpen?'▲':'▼'}</span>
+    </button>
+    ${A.legendOpen?`<div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:2px;background:#7FA7C9;flex-shrink:0"></div><span style="font-size:10px;color:${TSEC}">winter</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:2px;background:#8FBF9A;flex-shrink:0"></div><span style="font-size:10px;color:${TSEC}">spring</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:2px;background:#E3B663;flex-shrink:0"></div><span style="font-size:10px;color:${TSEC}">summer</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:2px;background:#C47A4A;flex-shrink:0"></div><span style="font-size:10px;color:${TSEC}">autumn</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:2px;background:${CURRENT};flex-shrink:0"></div><span style="font-size:10px;color:${TSEC}">current week</span></div>
+      <div style="display:flex;align-items:center;gap:6px"><div style="width:12px;height:12px;border-radius:2px;background:#2A2E32;border:1px solid #3a3f44;flex-shrink:0"></div><span style="font-size:10px;color:${TSEC}">future</span></div>
+      <div style="grid-column:1/-1;display:flex;align-items:center;gap:6px;margin-top:2px"><span style="font-size:10px;color:#3d4348">●</span><span style="font-size:10px;color:#3d4348">dot = note written</span></div>
+    </div>`:''}
+  </div>
+</div>`;
 }
 
-// ── Week Grid ─────────────────────────────────────────────────────
+// ── Week Grid (52-col, 1 row = 1 year) ───────────────────────────
 function buildWeekGrid(){
-  const s=A.stats,cols=26;
-  const mYears=new Set(MS.map(m=>m.year*2));
+  const s=A.stats,cols=52;
+  const totalYears=Math.ceil(s.totalWeeks/cols);
   let html='<div style="display:flex;flex-direction:column;gap:1px">';
-  const totalRows=Math.ceil(s.totalWeeks/cols);
-  for(let row=0;row<totalRows;row++){
-    const yearNum=Math.floor(row/2),isMilestone=mYears.has(row)&&row>0;
+  for(let year=0;year<totalYears;year++){
+    const isMilestone=MS.find(m=>m.year===year)&&year>0;
+    const isCurrYear=Math.floor(s.yearsLived)===year;
     if(isMilestone){
-      const ml=MS.find(m=>m.year===yearNum);
-      html+=`<div style="height:1px;background:rgba(154,161,168,.12);margin:2px 0;position:relative"><span style="position:absolute;right:0;top:-7px;font-size:8px;color:${TSEC};opacity:.4">${ml?ml.label:''}</span></div>`;
+      html+=`<div style="height:1px;background:rgba(154,161,168,.10);margin:2px 0;position:relative"><span style="position:absolute;left:0;top:-7px;font-size:7px;color:${TSEC};opacity:.35">${isMilestone.label}</span></div>`;
     }
-    html+='<div style="display:flex;gap:1px">';
+    html+=`<div style="display:flex;gap:0.5px;align-items:center">`;
+    html+=`<span style="font-size:7px;color:${isCurrYear?CURRENT:'#3d4348'};width:18px;flex-shrink:0;text-align:right;margin-right:2px;font-weight:${isCurrYear?500:400}">${year===0?'b':year}</span>`;
     for(let col=0;col<cols;col++){
-      const i=row*cols+col;if(i>=s.totalWeeks)break;
-      const past=i<=s.weeksLived,current=i===s.weeksLived;
+      const i=year*cols+col;if(i>=s.totalWeeks)break;
+      const past=i<s.weeksLived,current=i===s.weeksLived;
       const hasNote=!!A.notes[wk(i)];
-      const bg=past?(hasNote?'#a8b2bb':PAST):current?CURRENT:FUTURE;
-      const brd=`1px solid ${current?CURRENT:past?'transparent':'#3a3f44'}`;
-      const shadow=current?`0 0 6px ${CURRENT}44`:hasNote&&past?`0 0 0 1px ${CURRENT}55`:'none';
-      html+=`<div class="gc" style="flex:1;aspect-ratio:1;border-radius:1.5px;background:${bg};border:${brd};box-shadow:${shadow}" onclick="openSheet('week','${wk(i)}','week ${i+1}','${e(weekRange(A.birthDate,i))}',${NL.week},${past?1:0})"></div>`;
+      const isHL=A.highlightWeek===i;
+      const bg=current?CURRENT:past?getWeekColor(i):FUTURE;
+      const brd=`1px solid ${current?CURRENT:past?'transparent':'#2d3238'}`;
+      const shadow=current?`0 0 5px ${CURRENT}66`:'none';
+      const id=isHL?`id="hl-cell"`:'';
+      const cls=`gc${isHL?' highlight-pulse':''}`;
+      const dot=hasNote&&(past||current)?`<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3px;color:rgba(255,255,255,.75);line-height:1;pointer-events:none">●</span>`:'';
+      html+=`<div ${id} class="${cls}" style="flex:1;aspect-ratio:1;border-radius:1px;background:${bg};border:${brd};box-shadow:${shadow};position:relative;min-width:0" onclick="openSheet('week','${wk(i)}','week ${i+1}','${e(weekRange(A.birthDate,i))}',${NL.week},${(past||current)?1:0})" title="week ${i+1}${current?' · current':''}">${dot}</div>`;
     }
     html+='</div>';
   }
   html+='</div>';
-  html+=`<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px 12px">${MS.map(m=>`<span style="font-size:9px;color:${TSEC};opacity:.35">— ${m.label} yr ${m.year}</span>`).join('')}</div>`;
-  html+=`<p style="margin-top:8px;font-size:10px;color:#5a6068">tap any cell to log a note</p>`;
+  html+=`<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 12px">${MS.map(m=>`<span style="font-size:8px;color:${TSEC};opacity:.3">— ${m.label} yr ${m.year}</span>`).join('')}</div>`;
   return html;
 }
 
@@ -378,27 +693,26 @@ function buildSun(clockStr){
   const sky=pct<.20?['#0a0c10','#0d1117']:pct<.25?['#1a1220','#2d1b35']:pct<.30?['#2d1f3d','#c2714f']:pct<.38?['#1a2a4a','#e8956d']:pct<.62?['#1a2d4a','#243a52']:pct<.70?['#1a2a3a','#2a3a4a']:pct<.75?['#2a1f3a','#c2714f']:pct<.80?['#1a1225','#3d1f2d']:['#0a0c10','#0d1117'];
   const sc=isNight?null:(pct<.30||pct>.70)?'#e8956d':(pct<.38||pct>.62)?'#f5c842':CURRENT;
   const stars=isNight?[[80,20],[150,45],[230,15],[310,35],[420,18],[500,40],[560,22],[100,60],[260,55],[380,65],[470,50],[540,70],[60,80],[330,80]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r=".9" fill="#e6e8ea" opacity="${.4+(i%3)*.15}"/>`).join(''):'';
-  return `
-  <div style="position:relative;height:${H}px;overflow:hidden;pointer-events:none">
-    <svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${sky[0]}"/><stop offset="100%" stop-color="${sky[1]}"/></linearGradient>
-        ${sc?`<radialGradient id="sunG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="${sc}" stop-opacity=".35"/><stop offset="100%" stop-color="${sc}" stop-opacity="0"/></radialGradient>`:''}
-        <radialGradient id="moonG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#aab4c8" stop-opacity=".2"/><stop offset="100%" stop-color="#aab4c8" stop-opacity="0"/></radialGradient>
-        <linearGradient id="fadeG" x1="0" y1="0" x2="0" y2="1"><stop offset="40%" stop-color="${BG}" stop-opacity="0"/><stop offset="100%" stop-color="${BG}" stop-opacity="1"/></linearGradient>
-      </defs>
-      <rect width="${W}" height="${H}" fill="url(#skyG)"/>
-      ${stars}
-      ${sunVis?`<ellipse cx="${sx}" cy="${sy}" rx="52" ry="52" fill="url(#sunG)"/><circle cx="${sx}" cy="${sy}" r="14" fill="${sc}" opacity=".92"/>`:''}
-      ${moonVis?`<ellipse cx="${mx}" cy="${my}" rx="38" ry="38" fill="url(#moonG)"/><circle cx="${mx}" cy="${my}" r="9" fill="#d0d8e8" opacity=".85"/>`:''}
-      <line x1="0" y1="${H-1}" x2="${W}" y2="${H-1}" stroke="#ffffff08" stroke-width="1"/>
-      <rect width="${W}" height="${H}" fill="url(#fadeG)"/>
-    </svg>
-    <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center">
-      <div style="font-size:30px;font-weight:200;color:${TPRI};letter-spacing:-.03em;line-height:1">${clockStr}</div>
-      <div style="font-size:9px;color:${TSEC};letter-spacing:.1em;margin-top:3px;text-transform:uppercase">system time</div>
-    </div>
-  </div>`;
+  return `<div style="position:relative;height:${H}px;overflow:hidden;pointer-events:none">
+  <svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${sky[0]}"/><stop offset="100%" stop-color="${sky[1]}"/></linearGradient>
+      ${sc?`<radialGradient id="sunG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="${sc}" stop-opacity=".35"/><stop offset="100%" stop-color="${sc}" stop-opacity="0"/></radialGradient>`:''}
+      <radialGradient id="moonG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#aab4c8" stop-opacity=".2"/><stop offset="100%" stop-color="#aab4c8" stop-opacity="0"/></radialGradient>
+      <linearGradient id="fadeG" x1="0" y1="0" x2="0" y2="1"><stop offset="40%" stop-color="${BG}" stop-opacity="0"/><stop offset="100%" stop-color="${BG}" stop-opacity="1"/></linearGradient>
+    </defs>
+    <rect width="${W}" height="${H}" fill="url(#skyG)"/>
+    ${stars}
+    ${sunVis?`<ellipse cx="${sx}" cy="${sy}" rx="52" ry="52" fill="url(#sunG)"/><circle cx="${sx}" cy="${sy}" r="14" fill="${sc}" opacity=".92"/>`:''}
+    ${moonVis?`<ellipse cx="${mx}" cy="${my}" rx="38" ry="38" fill="url(#moonG)"/><circle cx="${mx}" cy="${my}" r="9" fill="#d0d8e8" opacity=".85"/>`:''}
+    <line x1="0" y1="${H-1}" x2="${W}" y2="${H-1}" stroke="#ffffff08" stroke-width="1"/>
+    <rect width="${W}" height="${H}" fill="url(#fadeG)"/>
+  </svg>
+  <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center">
+    <div style="font-size:30px;font-weight:200;color:${TPRI};letter-spacing:-.03em;line-height:1">${clockStr}</div>
+    <div style="font-size:9px;color:${TSEC};letter-spacing:.1em;margin-top:3px;text-transform:uppercase">system time</div>
+  </div>
+</div>`;
 }
 
 // ── Sheet ─────────────────────────────────────────────────────────
@@ -408,6 +722,12 @@ function buildSheet(){
   const hasSaved=!!A.notes[sh.noteKey];
   const rem=sh.limit-(A.sheetText||'').length;
   const editor=sh.isPast?`
+    ${sh.type==='week'?`<div style="margin-bottom:12px">
+      <div style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">cycle rating</div>
+      <div style="display:flex;gap:5px">
+        ${[0,1,2,3].map(i=>{const sel=A.moods[sh.noteKey]===i;return`<button onclick="setSheetMood(${i})" style="flex:1;padding:5px 4px;font-size:9px;border-radius:4px;border:1px solid ${i===0?'#6A5A7A':i===1?'#5A4A6A':BORDER};background:${sel?(i===0?'#4A3A5A':i===1?'#3d3550':'rgba(242,197,114,.15)'):DEEP};color:${sel?(i===0?'#E6E8EA':i===1?'#E6E8EA':CURRENT):TSEC};cursor:pointer">${MOOD_LABELS[i]}</button>`;}).join('')}
+      </div>
+    </div>`:''}
     <div style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px">${hasSaved?'edit note':'add note'} — ${sh.limit} char max</div>
     <textarea id="sheet-ta" oninput="sheetInput(this.value)" rows="3" placeholder="log entry…">${e(A.sheetText)}</textarea>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
@@ -419,37 +739,37 @@ function buildSheet(){
       </div>
     </div>`
     :`<div class="future-msg"><div style="font-size:11px;color:#5a6068">this period hasn't happened yet.</div><div style="font-size:10px;color:#3d4348;margin-top:4px">notes can only be added to past or current periods.</div></div>`;
-
-  return `
-  <div class="overlay" onclick="overlayClick(event)">
-    <div class="sheet" onclick="event.stopPropagation()">
-      <div class="sheet-header">
-        <div class="sheet-handle"></div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+  return `<div class="overlay" onclick="overlayClick(event)">
+  <div class="sheet" onclick="event.stopPropagation()" id="sheet-panel"
+    ontouchstart="sheetTouchStart(event)" ontouchend="sheetTouchEnd(event)">
+    <div class="sheet-header">
+      <div class="sheet-handle"></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="display:flex;align-items:center;gap:10px">
+          ${sh.type==='week'?`<button onclick="navigateSheet(-1)" style="background:none;border:none;color:${TSEC};font-size:18px;cursor:pointer;padding:0;line-height:1;opacity:.6" title="previous week">‹</button>`:''}
           <div>
             <div style="font-size:15px;font-weight:300;color:${TPRI}">${e(sh.title)}</div>
             ${sh.subtitle?`<div style="font-size:11px;color:${TSEC};margin-top:3px">${e(sh.subtitle)}</div>`:''}
           </div>
-          <button onclick="closeSheet()" style="font-size:20px;color:${TSEC};background:none;border:none;cursor:pointer;padding:0 6px;line-height:1">×</button>
+          ${sh.type==='week'?`<button onclick="navigateSheet(1)" style="background:none;border:none;color:${TSEC};font-size:18px;cursor:pointer;padding:0;line-height:1;opacity:.6" title="next week">›</button>`:''}
         </div>
-      </div>
-      <div class="sheet-body">
-        ${children}
-        ${children?`<div style="height:1px;background:${BORDER};margin:14px 0"></div>`:''}
-        ${editor}
+        <button onclick="closeSheet()" style="font-size:20px;color:${TSEC};background:none;border:none;cursor:pointer;padding:0 6px;line-height:1">×</button>
       </div>
     </div>
-  </div>`;
+    <div class="sheet-body">
+      ${children}
+      ${children?`<div style="height:1px;background:${BORDER};margin:14px 0"></div>`:''}
+      ${editor}
+    </div>
+  </div>
+</div>`;
 }
 
 function buildSheetChildren(){
   const sh=A.sheet,s=A.stats;
-  if(!sh||!s)return '';
-  const type=sh.type,noteKey=sh.noteKey;
-  if(type==='week')return '';
-
-  if(type==='month'){
-    const[,rest]=noteKey.split('m');const[year,month]=rest.split('_').map(Number);
+  if(!sh||!s||sh.type==='week')return '';
+  if(sh.type==='month'){
+    const[,rest]=sh.noteKey.split('m');const[year,month]=rest.split('_').map(Number);
     const wStart=Math.round((year*12+month)*(52.18/12));
     const wEnd=Math.min(Math.round((year*12+month+1)*(52.18/12)),s.weeksLived+1);
     const entries=[];
@@ -457,17 +777,15 @@ function buildSheetChildren(){
     if(!entries.length)return `<p style="font-size:12px;color:#5a6068;font-style:italic;margin-bottom:4px">no week notes logged this month.</p>`;
     return entries.map(e2=>`<div class="note-row"><div class="note-row-label">wk ${e2.idx+1}</div><div class="note-row-text">${e(e2.t)}</div></div>`).join('');
   }
-
-  if(type==='year'){
-    const y=+noteKey.replace('y','');
+  if(sh.type==='year'){
+    const y=+sh.noteKey.replace('y','');
     const entries=[];
     for(let m=0;m<12;m++){const t=A.notes[mk(y,m)];if(t)entries.push({m,t});}
     if(!entries.length)return `<p style="font-size:12px;color:#5a6068;font-style:italic;margin-bottom:4px">no month notes logged this year.</p>`;
     return entries.map(e2=>`<div class="note-row"><div class="note-row-label">${MN[e2.m]}</div><div class="note-row-text">${e(e2.t)}</div></div>`).join('');
   }
-
-  if(type==='decade'){
-    const d=+noteKey.replace('d','');
+  if(sh.type==='decade'){
+    const d=+sh.noteKey.replace('d','');
     const entries=[];
     for(let yi=0;yi<10;yi++){const y=d*10+yi;const t=A.notes[yk(y)];if(t)entries.push({y,t});}
     if(!entries.length)return `<p style="font-size:12px;color:#5a6068;font-style:italic;margin-bottom:4px">no year notes logged this decade.</p>`;
@@ -476,7 +794,7 @@ function buildSheetChildren(){
   return '';
 }
 
-// ── Event handlers ────────────────────────────────────────────────
+
 function handleStart(){
   const bd=document.getElementById('inp-bd')?.value;
   const ls=parseInt(document.getElementById('inp-ls')?.value)||90;
@@ -490,27 +808,60 @@ function handleStart(){
 function goConfig(){A.step='input';render();}
 function setTab(t){A.tab=t;render();}
 
+function toggleGoto(){A.gotoOpen=!A.gotoOpen;render();}
+
+function gotoDate(){
+  const d=document.getElementById('goto-date')?.value;
+  if(!d||!A.birthDate)return;
+  const idx=dateToWeekIdx(A.birthDate,d);
+  A.tab='weeks';A.highlightWeek=idx;A.gotoOpen=false;
+  render();
+  setTimeout(()=>{
+    const el=document.getElementById('hl-cell');
+    if(el){el.scrollIntoView({behavior:'smooth',block:'center'});
+      openSheet('week',wk(idx),`week ${idx+1}`,weekRange(A.birthDate,idx),NL.week,idx<=A.stats.weeksLived);}
+  },100);
+  setTimeout(()=>{A.highlightWeek=null;},3000);
+}
+
 function openSheet(type,noteKey,title,subtitle,limit,isPast){
   A.sheet={type,noteKey,title,subtitle,limit,isPast:!!isPast};
   A.sheetText=A.notes[noteKey]||'';
   render();
-  // re-focus textarea after render
   setTimeout(()=>{const ta=document.getElementById('sheet-ta');if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}},80);
 }
 
 function sheetInput(val){
   if(!A.sheet)return;
   A.sheetText=val.slice(0,A.sheet.limit);
-  // update char counter only — no full re-render to preserve focus
   const rem=A.sheet.limit-A.sheetText.length;
-  const counter=document.querySelector('.toast'); // reuse toast? no — update inline
-  // find the rem span and update it directly
-  const spans=document.querySelectorAll('.sheet-body span');
-  spans.forEach(sp=>{if(sp.textContent.includes('left'))sp.textContent=rem+' left';});
+  document.querySelectorAll('.sheet-body span').forEach(sp=>{if(sp.textContent.includes('left'))sp.textContent=rem+' left';});
+}
+
+function navigateSheet(dir){
+  if(!A.sheet||A.sheet.type!=='week')return;
+  const s=A.stats;
+  const cur=+A.sheet.noteKey.slice(1);
+  let next=cur+dir;
+  if(next<0||next>=s.totalWeeks)return;
+  // save current text before navigating
+  if(A.sheetText!==''||(A.notes[A.sheet.noteKey]||'')!==''){
+    if(A.sheetText!==''&&A.sheetText!==(A.notes[A.sheet.noteKey]||'')){
+      A.notes[A.sheet.noteKey]=A.sheetText;save();
+    }
+  }
+  const isPast=next<=s.weeksLived;
+  openSheet('week',wk(next),`week ${next+1}`,weekRange(A.birthDate,next),NL.week,isPast);
+}
+
+function setSheetMood(m){
+  if(!A.sheet)return;
+  A.moods[A.sheet.noteKey]=m;
+  save();render();
+  setTimeout(()=>{const ta=document.getElementById('sheet-ta');if(ta){ta.focus();}},50);
 }
 
 function closeSheet(){A.sheet=null;A.sheetText='';render();}
-
 function overlayClick(ev){if(ev.target.classList.contains('overlay'))closeSheet();}
 
 function saveNote(){
@@ -523,6 +874,95 @@ function deleteNote(){
   if(!A.sheet)return;
   delete A.notes[A.sheet.noteKey];
   save();closeSheet();showToast('note cleared');
+}
+
+// ── Time Items ────────────────────────────────────────────────────
+function openTimeSheet(){
+  if(!A.timeItems)A.timeItems=JSON.parse(JSON.stringify(DEFAULT_TIME_ITEMS));
+  A.timeSheet=true;render();
+}
+function closeTimeSheet(){A.timeSheet=false;render();}
+function updateTimeItem(i,key,val){
+  if(!A.timeItems)A.timeItems=JSON.parse(JSON.stringify(DEFAULT_TIME_ITEMS));
+  A.timeItems[i][key]=val;render();
+}
+function addTimeItem(){
+  if(!A.timeItems)A.timeItems=JSON.parse(JSON.stringify(DEFAULT_TIME_ITEMS));
+  A.timeItems.push({l:'new item',type:'age',target:70,unit:'weeks'});render();
+}
+function deleteTimeItem(i){
+  A.timeItems.splice(i,1);render();
+}
+function saveTimeItems(){
+  saveConfig();A.timeSheet=false;render();showToast('items saved');
+}
+
+// ── Export / Import ───────────────────────────────────────────────
+function notesToCSVRows(){
+  const rows=[['date','title','note']];
+  Object.keys(A.notes).forEach(key=>{
+    if(!key.startsWith('w'))return;
+    const idx=+key.slice(1);
+    const s=new Date(A.birthDate);s.setDate(s.getDate()+idx*7);
+    const dateStr=s.toISOString().split('T')[0];
+    rows.push([dateStr,`week ${idx+1}`,A.notes[key]]);
+  });
+  return rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+}
+
+function exportCSV(){
+  const b=new Blob([notesToCSVRows()],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='life-system-timeline.csv';a.click();
+  showToast('csv exported');
+}
+
+function exportJSON(){
+  const out={};
+  Object.keys(A.notes).forEach(key=>{
+    if(!key.startsWith('w'))return;
+    const idx=+key.slice(1);
+    const s=new Date(A.birthDate);s.setDate(s.getDate()+idx*7);
+    out[s.toISOString().split('T')[0]]={weekIndex:idx,note:A.notes[key]};
+  });
+  const b=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='life-system-timeline.json';a.click();
+  showToast('json exported');
+}
+
+function importFile(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.csv,.json';
+  inp.onchange=ev=>{
+    const f=ev.target.files[0];if(!f)return;
+    const r=new FileReader();r.onload=re=>{
+      try{
+        const text=re.target.result;
+        let imported=0;
+        if(f.name.endsWith('.json')){
+          const d=JSON.parse(text);
+          // support both backup format and timeline format
+          if(d.notes){Object.assign(A.notes,d.notes);imported=Object.keys(d.notes).length;}
+          else{Object.keys(d).forEach(dateStr=>{const idx=dateToWeekIdx(A.birthDate,dateStr);if(idx>=0){A.notes[wk(idx)]=d[dateStr].note||'';imported++;}});}
+        } else {
+          // CSV parse
+          const lines=text.trim().split('\n').slice(1);
+          lines.forEach(line=>{
+            const cols=line.match(/(".*?"|[^,]+)(?=,|$)/g)||[];
+            const clean=c=>c.replace(/^"|"$/g,'').replace(/""/g,'"');
+            const dateStr=clean(cols[0]||''),note=clean(cols[2]||cols[1]||'');
+            if(!dateStr)return;
+            const idx=dateToWeekIdx(A.birthDate,dateStr);
+            if(idx>=0){A.notes[wk(idx)]=note.slice(0,140);imported++;}
+          });
+        }
+        save();render();showToast(`imported ${imported} entries`);
+      }catch{showToast('import failed — check file format');}
+    };r.readAsText(f);
+  };inp.click();
+}
+
+function copyPrompt(){
+  const prompt=`Help me create a life timeline file for import into my Life System app.\n\nOutput in CSV format with these columns:\ndate,title,note\n\nRules:\n- Use real or approximate dates when exact dates are unknown\n- Keep titles short (under 40 chars)\n- Keep notes under 100 characters\n- Focus on meaningful milestones\n- Cover my life from childhood to today\n- Include recurring milestones: birthdays (every year), New Year's (Jan 1 each year), and any personal holidays or traditions\n- If exact dates are unknown, estimate reasonably\n\nI will paste my life history below:\n[PASTE YOUR LIFE HISTORY HERE]`;
+  navigator.clipboard.writeText(prompt).then(()=>showToast('prompt copied')).catch(()=>showToast('copy failed'));
 }
 
 function doBackup(){
@@ -547,6 +987,19 @@ function doRestore(){
     };r.readAsText(f);
   };inp.click();
 }
+
+let _tx=0;
+function sheetTouchStart(ev){_tx=ev.touches[0].clientX;}
+function sheetTouchEnd(ev){
+  const dx=ev.changedTouches[0].clientX-_tx;
+  if(Math.abs(dx)>50)navigateSheet(dx<0?1:-1);
+}
+document.addEventListener('keydown',ev=>{
+  if(!A.sheet||A.sheet.type!=='week')return;
+  if(ev.key==='ArrowRight')navigateSheet(1);
+  if(ev.key==='ArrowLeft')navigateSheet(-1);
+  if(ev.key==='Escape')closeSheet();
+});
 
 // ── Boot ──────────────────────────────────────────────────────────
 load();
