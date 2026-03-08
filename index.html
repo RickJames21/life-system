@@ -66,7 +66,7 @@ textarea:focus{border-color:#9AA1A8}
 <div class="toast" id="toast"></div>
 <script>
 'use strict';
-const APP_VERSION='2.3';
+const APP_VERSION='2.7';
 const BG='#1F2124',CARD='#262A2D',DEEP='#1a1d20',BORDER='#2F3338';
 const PAST='#8B949E',FUTURE='#2F3338',CURRENT='#F2C572';
 const TPRI='#E6E8EA',TSEC='#9AA1A8';
@@ -247,7 +247,7 @@ function buildDashboard(){
     ${buildTabs()}
     ${buildGridPanel()}
     ${buildImportExport()}
-    <p style="font-size:10px;color:#3d4348;letter-spacing:.05em;text-align:center;margin-top:8px">systems run one cycle at a time.</p>
+    <p style="font-size:10px;color:#3d4348;letter-spacing:.05em;text-align:center;margin-top:8px">systems run one cycle at a time. <span style="opacity:.5">v${APP_VERSION}</span></p>
   </div>
   ${A.sheet?buildSheet():''}
   ${A.timeSheet?buildTimeSheetHTML():''}
@@ -1188,6 +1188,45 @@ document.addEventListener('keydown',ev=>{
   if(ev.key==='ArrowLeft')navigateSheet(-1);
   if(ev.key==='Escape')closeSheet();
 });
+
+// ── Setup / Navigation ────────────────────────────────────────────
+function handleStart(){
+  const bd=document.getElementById('inp-bd')?.value;
+  const ls=parseInt(document.getElementById('inp-ls')?.value)||90;
+  const ms=document.getElementById('inp-ms')?.value||'';
+  if(!bd)return;
+  A.birthDate=bd;A.lifespan=ls;A.mission=ms;
+  A.stats=calcStats(bd,ls);A.step='dashboard';A.tab='weeks';
+  saveConfig();render();
+}
+function goConfig(){A.step='input';render();}
+function setTab(t){A.tab=t;render();}
+function toggleGoto(){A.gotoOpen=!A.gotoOpen;render();}
+function gotoDate(){
+  const d=document.getElementById('goto-date')?.value;
+  if(!d||!A.birthDate)return;
+  const idx=dateToWeekIdx(A.birthDate,d);
+  A.tab='weeks';A.highlightWeek=idx;A.gotoOpen=false;
+  render();
+  setTimeout(()=>{
+    const el=document.getElementById('hl-cell');
+    if(el){el.scrollIntoView({behavior:'smooth',block:'center'});
+      openSheet('week',wk(idx),`week ${idx+1}`,weekRange(A.birthDate,idx),NL.week,idx<=A.stats.weeksLived);}
+  },100);
+  setTimeout(()=>{A.highlightWeek=null;},3000);
+}
+function openSheet(type,noteKey,title,subtitle,limit,isPast){
+  A.sheet={type,noteKey,title,subtitle,limit,isPast:!!isPast};
+  A.sheetText=A.notes[noteKey]||'';
+  render();
+  setTimeout(()=>{const ta=document.getElementById('sheet-ta');if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}},80);
+}
+function sheetInput(val){
+  if(!A.sheet)return;
+  A.sheetText=val.slice(0,A.sheet.limit);
+  const rem=A.sheet.limit-A.sheetText.length;
+  document.querySelectorAll('.sheet-body span').forEach(sp=>{if(sp.textContent.includes('left'))sp.textContent=rem+' left';});
+}
 
 // ── Boot ──────────────────────────────────────────────────────────
 load();
