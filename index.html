@@ -54,6 +54,9 @@ textarea:focus{border-color:#9AA1A8}
 .cmd-btn.opt2:hover,.cmd-btn.opt2.sel{background:rgba(154,161,168,.15);color:#E6E8EA}
 .cmd-btn.opt3:hover,.cmd-btn.opt3.sel{background:rgba(242,197,114,.15);color:#F2C572;border-color:#F2C572}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.scan-wrap{display:flex;gap:1.5px;align-items:center;margin-top:7px;height:8px}
+.stk{flex:1;height:100%;background:#2a2f34;border-radius:1px;transition:background .05s,opacity .05s}
+.stk-on{background:#E0B46A;opacity:.55}
 .cursor{animation:blink 1.2s step-end infinite;color:#F2C572}
 @media(max-width:400px){.cmd-bar{padding:0 10px;gap:6px}.cmd-text,.cmd-input{font-size:11px}.cmd-btn{font-size:9px;padding:3px 5px}}
 </style>
@@ -98,6 +101,32 @@ function getBirthDoy(){
   return Math.floor((b-s)/86400000);
 }
 function getWeekColor(weekIdx){return seasonColor(getBirthDoy(),weekIdx);}
+
+// Decade palette — muted earthy tones, machine-instrument feel
+const DECADE_COLS=[
+  0x6A8FA8, // 0-9:  slate blue
+  0xA89068, // 10-19: warm sand
+  0x6A9478, // 20-29: muted sage
+  0xA0704A, // 30-39: terracotta
+  0x7A8A7A, // 40-49: cool grey-green
+  0x8A7A9A, // 50-59: dusty mauve
+  0x6A8878, // 60-69: teal grey
+  0x9A8860, // 70-79: aged brass
+  0x7A6A8A, // 80-89: twilight
+];
+function getDecadeColor(year){
+  const dec=Math.floor(year/10);
+  const c=DECADE_COLS[dec%DECADE_COLS.length];
+  const r=(c>>16)&0xff,g=(c>>8)&0xff,b=c&0xff;
+  return `rgb(${r},${g},${b})`;
+}
+function getDecadeColorDim(year){
+  const dec=Math.floor(year/10);
+  const c=DECADE_COLS[dec%DECADE_COLS.length];
+  const r=(c>>16)&0xff,g=(c>>8)&0xff,b=c&0xff;
+  // dim for future cells
+  return `rgb(${Math.round(r*.22)},${Math.round(g*.22)},${Math.round(b*.22)})`;
+}
 function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 
@@ -133,7 +162,7 @@ function calcStats(bd,ls){
   const pct=Math.min(100,(weeksLived/totalWeeks)*100);
   const yearsLived=daysLived/365.25;
   const heartbeats=daysLived*100800;
-  const memoryWrites=Math.round(daysLived*150);
+  const memoryWrites=Math.round(daysLived*1.5);
   const networkConns=Math.round(Math.min(yearsLived/ls*80000,80000));
   const storageUsed=(daysLived*150*1000/(2.5e15)*100).toFixed(8);
   const errorRate=Math.round(daysLived*0.5);
@@ -211,6 +240,7 @@ function buildDashboard(){
   <div style="padding:0 14px 90px;max-width:600px;margin:0 auto">
     ${buildHeader(s)}
     ${A.mission?`<div style="margin-bottom:14px;padding:10px 13px;background:${CARD};border-radius:6px;border-left:2px solid ${CURRENT}"><div style="font-size:9px;color:${TSEC};letter-spacing:.08em;text-transform:uppercase">current mission</div><div style="margin-top:4px;font-size:13px;color:${TPRI};font-style:italic;line-height:1.6">${e(A.mission)}${A.missionStartWeek!==null?`<span style="font-size:10px;color:#5a6068;font-style:normal;margin-left:8px">${s.weeksLived-A.missionStartWeek} wk</span>`:''}​</div></div>`:''}
+    ${buildSystemStatus(s)}
     ${buildMetrics(s)}
     ${buildObservations(s)}
     ${buildTimeRemaining(s)}
@@ -412,22 +442,80 @@ function buildHeader(s){
 </div>`;
 }
 
-function buildMetrics(s){
-  const cards=[
-    {l:'weeks lived',v:fmt(s.weeksLived)},
-    {l:'weeks remaining',v:fmt(s.weeksRemaining)},
-    {l:'life elapsed',v:s.pct.toFixed(1)+'%'},
-    {l:'uptime',v:'66.7%',sub:'awake vs total'},
-    {l:'heartbeats',v:fmt(s.heartbeats)},
-    {l:'memory writes',v:fmt(s.memoryWrites),sub:'est. memories'},
-    {l:'network conns',v:fmt(s.networkConns),sub:'of ~80k lifetime'},
-    {l:'storage used',v:s.storageUsed+'%',sub:'of 2.5 petabytes'},
-    {l:'error log',v:fmt(s.errorRate),sub:'est. decisions'},
-    {l:'earth orbits',v:s.orbits},
-  ];
-  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px">
-    ${cards.map(c=>`<div class="card"><div class="card-label">${e(c.l)}</div><div class="card-value">${e(c.v)}</div>${c.sub?`<div class="card-sub">${e(c.sub)}</div>`:''}</div>`).join('')}
+function buildSystemStatus(s){
+  // derive status from pct + recent logging activity
+  const recentLogged=Object.keys(A.moods).filter(k=>+k.slice(1)>=s.weeksLived-4).length;
+  const mood=A.moods[wk(s.weeksLived)]??A.moods[wk(s.weeksLived-1)]??2;
+  let status,color;
+  if(mood===0){status='CRITICAL';color='#c47a7a';}
+  else if(mood===1||recentLogged<1){status='DEGRADED';color='#b8956a';}
+  else if(mood===3&&recentLogged>=3){status='OPTIMAL';color='#8FBF9A';}
+  else{status='NOMINAL';color='#8fa8b8';}
+  const dot=`<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${color};margin-right:7px;opacity:.9;flex-shrink:0;animation:${status==='CRITICAL'?'blink 1.2s step-end infinite':'none'}"></span>`;
+  return `<div style="display:flex;align-items:center;padding:7px 11px;background:#0d0f11;border:1px solid #2a2e32;border-radius:4px;margin-bottom:12px;letter-spacing:.08em">
+    ${dot}
+    <span style="font-size:9px;color:#5a6068;margin-right:6px">SYSTEM STATUS</span>
+    <span style="font-size:9px;color:${color};font-weight:500">${status}</span>
+    <span style="margin-left:auto;font-size:8px;color:#3d4348;letter-spacing:.04em">${new Date().toISOString().slice(0,16).replace('T',' ')} UTC</span>
   </div>`;
+}
+
+// ── Scanline meter widget ─────────────────────────────────────────
+function scanBar(pct,uid){
+  // 20 tick segments, fills left to right
+  const segs=20;
+  const filled=Math.round(Math.min(1,Math.max(0,pct))*segs);
+  let ticks='';
+  for(let i=0;i<segs;i++){
+    const active=i<filled;
+    ticks+=`<span class="stk${active?' stk-on':''}" id="${uid}_${i}"></span>`;
+  }
+  return `<div class="scan-wrap" data-pct="${pct}" data-uid="${uid}" data-segs="${segs}">${ticks}</div>`;
+}
+
+let _scanAnimated=false;
+function animateScans(){
+  if(_scanAnimated)return; _scanAnimated=true;
+  document.querySelectorAll('.scan-wrap').forEach(wrap=>{
+    const pct=parseFloat(wrap.dataset.pct);
+    const segs=parseInt(wrap.dataset.segs);
+    const uid=wrap.dataset.uid;
+    const filled=Math.round(Math.min(1,Math.max(0,pct))*segs);
+    for(let i=0;i<filled;i++){
+      const el=document.getElementById(uid+'_'+i);
+      if(el) setTimeout(()=>el.classList.add('stk-on'), 40 + i*(1100/segs));
+    }
+  });
+}
+
+function buildMetrics(s){
+  _scanAnimated=false;
+  const totalWeeks=s.totalWeeks;
+  const lifeHeartbeats=s.ls*365.25*100800;
+  const sleepCycles=Math.round(s.daysLived*0.94);
+  const lifeSleepCycles=Math.round(s.ls*365.25*0.94);
+  const cards=[
+    {l:'weeks lived',    v:fmt(s.weeksLived),    pct:s.weeksLived/totalWeeks,           uid:'m0'},
+    {l:'weeks remaining',v:fmt(s.weeksRemaining), pct:s.weeksRemaining/totalWeeks,       uid:'m1'},
+    {l:'life elapsed',   v:s.pct.toFixed(1)+'%', pct:s.pct/100,                         uid:'m2'},
+    {l:'uptime',         v:'66.7%',              pct:0.667, sub:'awake vs total',         uid:'m3'},
+    {l:'heartbeats',     v:`<span id='live-hb'>${fmt(s.heartbeats)}</span>`, raw:true, pct:s.heartbeats/lifeHeartbeats, uid:'m4'},
+    {l:'memory writes',  v:`<span id='live-mw'>${fmt(s.memoryWrites)}</span>`, raw:true, pct:s.memoryWrites/(s.ls*365.25*1.5), uid:'m5', sub:'est. memories'},
+    {l:'network conns',  v:fmt(s.networkConns),  pct:s.networkConns/80000,              uid:'m6', sub:'of ~80k lifetime'},
+    {l:'sleep cycles',   v:fmt(sleepCycles),     pct:sleepCycles/lifeSleepCycles,       uid:'m7', sub:'est. since birth'},
+    {l:'error log',      v:fmt(s.errorRate),     pct:Math.min(1,s.errorRate/100000),    uid:'m8', sub:'est. decisions'},
+    {l:'earth orbits',   v:`<span id='live-orb'>${s.yearsLived.toFixed(5)}</span>`, raw:true, pct:(s.yearsLived%1), uid:'m9'},
+  ];
+  const html=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px">
+    ${cards.map(c=>`<div class="card">
+      <div class="card-label">${e(c.l)}</div>
+      <div class="card-value">${c.raw?c.v:e(c.v)}</div>
+      ${c.sub?`<div class="card-sub">${e(c.sub)}</div>`:''}
+      ${scanBar(c.pct,c.uid)}
+    </div>`).join('')}
+  </div>`;
+  setTimeout(animateScans,80);
+  return html;
 }
 
 function buildObservations(s){
@@ -579,10 +667,10 @@ function buildWeekGrid(){
   const totalYears=Math.ceil(s.totalWeeks/cols);
   let html='<div style="display:flex;flex-direction:column;gap:1px">';
   for(let year=0;year<totalYears;year++){
-    const isMilestone=MS.find(m=>m.year===year)&&year>0;
+    const isMilestone=year>0?MS.find(m=>m.year===year):null;
     const isCurrYear=Math.floor(s.yearsLived)===year;
     if(isMilestone){
-      html+=`<div style="height:1px;background:rgba(154,161,168,.10);margin:2px 0;position:relative"><span style="position:absolute;left:0;top:-7px;font-size:7px;color:${TSEC};opacity:.35">${isMilestone.label}</span></div>`;
+      html+=`<div style="height:1px;background:rgba(154,161,168,.12);margin:5px 0 4px;position:relative"><span style="position:absolute;left:0;top:-8px;font-size:7px;color:${TSEC};opacity:.45;letter-spacing:.06em">${isMilestone.label}</span></div>`;
     }
     html+=`<div style="display:flex;gap:0.5px;align-items:center">`;
     html+=`<span style="font-size:7px;color:${isCurrYear?CURRENT:'#3d4348'};width:18px;flex-shrink:0;text-align:right;margin-right:2px;font-weight:${isCurrYear?500:400}">${year===0?'b':year}</span>`;
@@ -622,10 +710,14 @@ function buildMonthGrid(){
       const wStart=Math.round(i*(52.18/12)),wEnd=Math.round((i+1)*(52.18/12));
       let hasNote=!!A.notes[mKey];
       if(!hasNote)for(let wi=0;wi<wEnd-wStart;wi++){const idx=wStart+wi;if(idx<=s.weeksLived&&A.notes[wk(idx)]){hasNote=true;break;}}
-      const bg=past?(hasNote?'#a8b2bb':PAST):current?CURRENT:FUTURE;
-      const brd=`1px solid ${current?CURRENT:past?'transparent':'#3a3f44'}`;
-      const shadow=current?`0 0 6px ${CURRENT}44`:hasNote&&past?`0 0 0 1px ${CURRENT}55`:'none';
-      html+=`<div class="gc" style="flex:1;aspect-ratio:1;border-radius:2px;background:${bg};border:${brd};box-shadow:${shadow}" onclick="openSheet('month','${mKey}','${MN[col]} yr ${year}','age ${year}, month ${col+1}',${NL.month},${past?1:0})"></div>`;
+      // season color: use middle week of this month
+      const midWeek=Math.round(i*(52.18/12)+(52.18/24));
+      const sc=getWeekColor(midWeek);
+      const bg=current?CURRENT:past?sc:getDecadeColorDim(year);
+      const brd=`1px solid ${current?CURRENT:past?'transparent':'#2a2e32'}`;
+      const shadow=current?`0 0 6px ${CURRENT}44`:'none';
+      const dot=hasNote&&past?`<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3px;color:rgba(255,255,255,.75);line-height:1;pointer-events:none">●</span>`:'';
+      html+=`<div class="gc" style="flex:1;aspect-ratio:1;border-radius:2px;background:${bg};border:${brd};box-shadow:${shadow};position:relative" onclick="openSheet('month','${mKey}','${MN[col]} yr ${year}','age ${year}, month ${col+1}',${NL.month},${past?1:0})">${dot}</div>`;
     }
     html+='</div>';
   }
@@ -644,10 +736,12 @@ function buildYearGrid(){
       const past=y<=yearsLivedInt,current=y===yearsLivedInt,yKey=yk(y);
       let hasNote=past&&!!A.notes[yKey];
       if(!hasNote&&past)for(let m=0;m<12;m++)if(A.notes[mk(y,m)]){hasNote=true;break;}
-      const bg=past?(hasNote?'#a8b2bb':PAST):current?CURRENT:FUTURE;
-      const brd=`1px solid ${current?CURRENT:past?'transparent':'#3a3f44'}`;
-      const shadow=current?`0 0 6px ${CURRENT}44`:hasNote&&past?`0 0 0 1px ${CURRENT}55`:'none';
-      html+=`<div class="gc" style="flex:1;aspect-ratio:1;border-radius:3px;background:${bg};border:${brd};box-shadow:${shadow}" onclick="openSheet('year','${yKey}','year ${y}','age ${y}',${NL.year},${past?1:0})"></div>`;
+      const dc=getDecadeColor(y);
+      const bg=current?CURRENT:past?dc:getDecadeColorDim(y);
+      const brd=`1px solid ${current?CURRENT:past?'transparent':'#2a2e32'}`;
+      const shadow=current?`0 0 6px ${CURRENT}44`:'none';
+      const dot=hasNote&&past?`<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:3px;color:rgba(255,255,255,.6);line-height:1;pointer-events:none">●</span>`:'';
+      html+=`<div class="gc" style="flex:1;aspect-ratio:1;border-radius:3px;background:${bg};border:${brd};box-shadow:${shadow};position:relative" onclick="openSheet('year','${yKey}','year ${y}','age ${y}',${NL.year},${past?1:0})">${dot}</div>`;
     }
     html+='</div>';
   }
@@ -663,10 +757,11 @@ function buildDecadeGrid(){
     const past=d<=currDec,current=d===currDec,dKey=dk(d);
     let hasNote=past&&!!A.notes[dKey];
     if(!hasNote&&past)for(let yi=0;yi<10;yi++)if(A.notes[yk(d*10+yi)]){hasNote=true;break;}
-    const bg=past?(hasNote?'#a8b2bb':PAST):current?CURRENT:FUTURE;
-    const brd=`1px solid ${current?CURRENT:past?'transparent':'#3a3f44'}`;
-    const shadow=current?`0 0 8px ${CURRENT}44`:hasNote&&past?`0 0 0 1px ${CURRENT}55`:'none';
-    const labelColor=current?'#1F2124':past?TPRI:TSEC;
+    const dc=getDecadeColor(d*10);
+    const bg=current?CURRENT:past?dc:getDecadeColorDim(d*10);
+    const brd=`1px solid ${current?CURRENT:past?'transparent':'#2a2e32'}`;
+    const shadow=current?`0 0 8px ${CURRENT}44`:'none';
+    const labelColor=current?'#1F2124':TPRI;
     const decLabel=`${d*10}–${Math.min((d+1)*10-1,s.ls-1)}`;
     html+=`<div class="gc" style="width:calc(25% - 5px);aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:${bg};border:${brd};box-shadow:${shadow}" onclick="openSheet('decade','${dKey}','decade ${d+1}','age ${d*10}–${(d+1)*10-1}',${NL.decade},${past?1:0})">
       <span style="font-size:11px;font-weight:300;color:${labelColor};text-align:center;padding:0 4px">${decLabel}</span>
@@ -1004,6 +1099,46 @@ document.addEventListener('keydown',ev=>{
 // ── Boot ──────────────────────────────────────────────────────────
 load();
 render();
+
+// ── Live metric tickers ───────────────────────────────────────────
+(function startTickers(){
+  if(!A.stats)return;
+  const birth=new Date(A.birthDate);
+
+  // heartbeats: ~1.15/sec (100800/day)
+  let hbFrac=0;
+  setInterval(()=>{
+    const el=document.getElementById('live-hb');
+    if(!el)return;
+    hbFrac+=100800/86400; // beats per second
+    const ms=Date.now()-birth.getTime();
+    const days=ms/86400000;
+    const hb=Math.floor(days*100800+hbFrac);
+    el.textContent=new Intl.NumberFormat().format(hb);
+  },1000);
+
+  // memory writes: ~150/day = 1 per ~576 seconds
+  let mwAccum=0;
+  setInterval(()=>{
+    const el=document.getElementById('live-mw');
+    if(!el)return;
+    mwAccum+=1.5/86400*250; // every 250ms — ~1 memory per 16hrs
+    const ms=Date.now()-birth.getTime();
+    const days=ms/86400000;
+    const mw=Math.round(days*150+mwAccum);
+    el.textContent=new Intl.NumberFormat().format(mw);
+  },250);
+
+  // earth orbits: year advances ~3.17e-8 per second = 0.00001 per ~5.5 min
+  // update every 2s for smooth 5-decimal display
+  setInterval(()=>{
+    const el=document.getElementById('live-orb');
+    if(!el)return;
+    const ms=Date.now()-birth.getTime();
+    const years=ms/(365.25*86400000);
+    el.textContent=years.toFixed(5);
+  },2000);
+})();
 </script>
 </body>
 </html>
